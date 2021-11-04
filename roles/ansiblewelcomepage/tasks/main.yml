@@ -1,0 +1,27 @@
+---
+- name: Create Ansible Automation Platform Welcome Page
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ ansible_operator_meta.name }}-welcomepage"
+        namespace: "{{ ansible_operator_meta.namespace }}"
+      spec:
+        selector:
+          matchLabels:
+            app: welcomepage
+        template:
+          metadata:
+            labels:
+              app: welcomepage
+          spec:
+            containers:
+              - name: welcomepage
+                image: nginx:latest
+                resources:
+                  limits:
+                    memory: "128Mi"
+                    cpu: "500m"
+                ports:
+                  - containerPort: 80

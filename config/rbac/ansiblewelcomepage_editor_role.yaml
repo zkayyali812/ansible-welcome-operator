@@ -1,0 +1,24 @@
+# permissions for end users to edit ansiblewelcomepages.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ansiblewelcomepage-editor-role
+rules:
+  - apiGroups:
+      - welcome.ansible.com
+    resources:
+      - ansiblewelcomepages
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - welcome.ansible.com
+    resources:
+      - ansiblewelcomepages/status
+    verbs:
+      - get
