@@ -2,6 +2,7 @@ apiVersion: welcome.ansible.com/v1alpha1
 kind: AnsibleWelcomePage
 metadata:
   name: example-ansiblewelcome
+  namespace: welcome-page-operator-system
 spec:
   # Add fields here
-  foo: bar
+  link1: www.openshift.com

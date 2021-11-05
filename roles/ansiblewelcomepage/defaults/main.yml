@@ -1,2 +1,5 @@
 ---
 # defaults file for AnsibleWelcomePage
+link1: www.test.com
+link2: www.redhat.com
+link3: www.ansible.com

@@ -1,4 +1,67 @@
 ---
+- name: Add Ansible Automation Platform Welcome Page Site Data
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: "{{ ansible_operator_meta.name }}-sitedata"
+        namespace: "{{ ansible_operator_meta.namespace }}"
+      data:
+        index.html: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <title>Ansible Welcome Operator</title>
+          <style>
+          html { color-scheme: light dark; }
+          body { width: 35em; margin: 0 auto;
+          font-family: Tahoma, Verdana, Arial, sans-serif; }
+          </style>
+          </head>
+          <body>
+          <h1>Welcome to Ansible welcome operator</h1>
+          <p>If you see this page, the nginx web server is successfully installed and
+          working. Further configuration is required.</p>
+
+          <p>For online documentation and support please refer to
+          <a href="http://nginx.org/">nginx.org</a>.<br/>
+          Commercial support is available at
+          <a href="http://nginx.com/">nginx.com</a>.</p>
+
+          <p><em>Thank you for using nginx.</em></p>
+
+          <h3>List of links passed from custom resource</h3>
+            <ol type = "1">
+              <li> <a href="{{ link1 }}">{{ link1 }}</a><br/></li>
+              <li><a href="{{ link2 }}">{{ link2 }}</a><br/></li>
+              <li><a href="{{ link3 }}">{{ link3 }}</a><br/></li>
+            </ol>
+          </body>
+          </html>
+
+        50x.html: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <title>Error</title>
+          <style>
+          html { color-scheme: light dark; }
+          body { width: 35em; margin: 0 auto;
+          font-family: Tahoma, Verdana, Arial, sans-serif; }
+          </style>
+          </head>
+          <body>
+          <h1>An error occurred.</h1>
+          <p>Sorry, the page you are looking for is currently unavailable.<br/>
+          Please try again later.</p>
+          <p>If you are the system administrator of this resource then you should check
+          the error log for details.</p>
+          <p><em>Faithfully yours, nginx.</em></p>
+          </body>
+          </html>
+
+
 - name: Create Ansible Automation Platform Welcome Page
   kubernetes.core.k8s:
     definition:
@@ -8,6 +71,7 @@
         name: "{{ ansible_operator_meta.name }}-welcomepage"
         namespace: "{{ ansible_operator_meta.namespace }}"
       spec:
+        replicas: 1
         selector:
           matchLabels:
             app: welcomepage
@@ -17,11 +81,41 @@
               app: welcomepage
           spec:
             containers:
-              - name: welcomepage
-                image: nginx:latest
-                resources:
-                  limits:
-                    memory: "128Mi"
-                    cpu: "500m"
-                ports:
-                  - containerPort: 80
+            - name: welcomepage
+              image: nginxinc/nginx-unprivileged:latest
+              imagePullPolicy: IfNotPresent
+              ports:
+              - containerPort: 8080
+              volumeMounts:
+              - mountPath: /usr/share/nginx/html # mount site data
+                name: welcomepage-data
+              - mountPath: /var/log/nginx
+                name: log
+            volumes:
+            - name: welcomepage-data
+              configMap:
+                name: "{{ ansible_operator_meta.name }}-sitedata" # place ConfigMap `nginx-conf` on /etc/nginx
+                items:
+                  - key: 50x.html
+                    path: 50x.html
+                  - key: index.html
+                    path: index.html
+            - name: log
+              emptyDir: {}
+
+- name: Create Welcome Page Service
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ ansible_operator_meta.name }}-service"
+        namespace: "{{ ansible_operator_meta.namespace }}"
+      spec:
+        type: LoadBalancer
+        ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          app: welcomepage

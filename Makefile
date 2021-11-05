@@ -29,7 +29,7 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 #
 # For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
 # ansible.com/welcome-page-operator-bundle:$VERSION and ansible.com/welcome-page-operator-catalog:$VERSION.
-IMAGE_TAG_BASE ?= quay.io/matburt/welcomepage
+IMAGE_TAG_BASE ?= quay.io/zkayyali812/welcomepage
 
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
@@ -58,7 +58,7 @@ help: ## Display this help.
 ##@ Build
 
 run: ansible-operator ## Run against the configured Kubernetes cluster in ~/.kube/config
-	ANSIBLE_ROLES_PATH="$(ANSIBLE_ROLES_PATH):$(shell pwd)/roles" $(ANSIBLE_OPERATOR) run
+	ANSIBLE_ROLES_PATH="$(shell pwd)/roles" $(ANSIBLE_OPERATOR) run
 
 docker-build: ## Build docker image with the manager.
 	docker build -t ${IMG} .

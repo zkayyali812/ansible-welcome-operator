@@ -29,6 +29,7 @@ spec:
         - --leader-elect
         - --leader-election-id=welcome-page-operator
         image: controller:latest
+        imagePullPolicy: Always
         name: manager
         env:
         - name: ANSIBLE_GATHERING
